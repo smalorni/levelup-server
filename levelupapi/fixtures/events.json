@@ -1,0 +1,26 @@
+[
+    {
+        "model": "levelupapi.event",
+        "pk": 1,
+        "fields": {
+            "game": 1,
+            "description": "Monopoly is a classic fast-dealing property trading board game.",
+            "date": "2022-12-25",
+            "time": "7:00:03",
+            "organizer": 1,
+            "attendees": [1]
+        }
+    },
+    {
+        "model": "levelupapi.event",
+        "pk": 2,
+        "fields": {
+            "game": 2,
+            "description": "Dungeons and Dragons is a fantasy role-playing game to hunt for treasure and fight dragons.",
+            "date": "2023-01-20",
+            "time": "6:00:35",
+            "organizer": 1,
+            "attendees": [1]
+        }
+    }
+]
