@@ -4,6 +4,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers, status
 from levelupapi.models import Event, Game, Gamer
+from rest_framework.decorators import action
 
 
 class EventView(ViewSet):
@@ -79,7 +80,35 @@ class EventView(ViewSet):
 
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
-
+    # delete event
+    def destroy(self, request, pk):
+        event = Event.objects.get(pk=pk)
+        event.delete()
+        return Response(None, status=status.HTTP_204_NO_CONTENT)
+    # Sign up for event
+    @action(methods=['post'], detail=True)
+    def signup(self, request, pk):
+        """Post request for a user to sign up for an event"""
+   
+        gamer = Gamer.objects.get(user=request.auth.user)
+        event = Event.objects.get(pk=pk)
+        event.attendees.add(gamer)
+        return Response({'message': 'Gamer added'}, status=status.HTTP_201_CREATED)
+    # Leave an event
+    # Action turns a method into a new route
+    # Method is 'delete', detail=true returns url with a pk
+    @action(methods=['delete'], detail=True)
+    # The new route is named after function below
+    def leave(self, request, pk):
+        """Delete request for a user to leave an event"""
+   
+        gamer = Gamer.objects.get(user=request.auth.user)
+        event = Event.objects.get(pk=pk)
+        # Removes gamer
+        event.attendees.remove(gamer)
+        # Message will show up in Postman
+        return Response({'message': 'Gamer removed'}, status=status.HTTP_204_NO_CONTENT)
+    
 # Make sure it outside of the first class
 class EventSerializer(serializers.ModelSerializer):
     """JSON serializer for events

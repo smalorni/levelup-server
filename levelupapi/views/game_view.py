@@ -74,6 +74,12 @@ class GameView(ViewSet):
         game.save()
 
         return Response(None, status=status.HTTP_204_NO_CONTENT)
+    # delete game
+    def destroy(self, request, pk):
+        game = Game.objects.get(pk=pk)
+        game.delete()
+        return Response(None, status=status.HTTP_204_NO_CONTENT)
+        
 
 
 # Make sure it outside of the first class
