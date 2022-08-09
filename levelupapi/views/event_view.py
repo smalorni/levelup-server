@@ -17,10 +17,19 @@ class EventView(ViewSet):
             Response -- JSON serialized list of events
         """
         events = Event.objects.all()
+        
         # Add in the next 3 lines - purpose: you're getting the events for specific game - look at erd
         game = request.query_params.get('game', None)
         if game is not None:
             events = events.filter(game_id=game)
+        # Needed this because gamer was undefined without it
+        gamer = Gamer.objects.get(user=request.auth.user)
+        
+        # Set the `joined` property on every event, loops through events list
+        for event in events:
+            # Check to see if the gamer is in the attendees list on the event, decides if it is true or false if gamer is on list
+            event.joined = gamer in event.attendees.all()
+                  
         serializer = EventSerializer(events, many=True)
         return Response(serializer.data)
 
@@ -85,8 +94,9 @@ class EventView(ViewSet):
         event = Event.objects.get(pk=pk)
         event.delete()
         return Response(None, status=status.HTTP_204_NO_CONTENT)
-    # Sign up for event
+    # Sign up for event - related to event manager fetch calls - use signup in the url to join event
     @action(methods=['post'], detail=True)
+    #The new route is named after function below - add "signup" to fetch call in event manager
     def signup(self, request, pk):
         """Post request for a user to sign up for an event"""
    
@@ -94,11 +104,11 @@ class EventView(ViewSet):
         event = Event.objects.get(pk=pk)
         event.attendees.add(gamer)
         return Response({'message': 'Gamer added'}, status=status.HTTP_201_CREATED)
-    # Leave an event
+    # Leave an event - related to event manager fetch calls - use leave in the url for leaving event
     # Action turns a method into a new route
     # Method is 'delete', detail=true returns url with a pk
     @action(methods=['delete'], detail=True)
-    # The new route is named after function below
+    # The new route is named after function below - add "leave" to fetch call in event manager
     def leave(self, request, pk):
         """Delete request for a user to leave an event"""
    
@@ -109,11 +119,12 @@ class EventView(ViewSet):
         # Message will show up in Postman
         return Response({'message': 'Gamer removed'}, status=status.HTTP_204_NO_CONTENT)
     
+ 
 # Make sure it outside of the first class
 class EventSerializer(serializers.ModelSerializer):
     """JSON serializer for events
     """
     class Meta:
         model = Event
-        fields = ('id', 'description', 'date', 'time', 'organizer', 'attendees')
+        fields = ('id', 'description', 'date', 'time', 'organizer', 'attendees', 'joined')
         #depth = 2
